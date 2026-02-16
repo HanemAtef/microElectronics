@@ -23,6 +23,7 @@ dbConnection();
 
 //require models
 const User=require("./models/User");
+const Product=require("./models/Product");
 app.post("/register", async(req,res)=>{
 try{
 //get data 
@@ -80,13 +81,58 @@ try{
 catch(err)
 {       console.log(err);
 }
+})
 
+//add product 
+    app.post("/addingProduct", async (req, res) => {
+    try {
+        const { name, price, stock, userId } = req.body;
+        if (!name || !price || !stock )return res.status(400).json({ msg:"Missing data"});
+        const user = await User.findById(userId);
+        if (!user)return res.status(404).json({ msg:"User not found"});
+        if (user.role !== "admin")return res.status(403).json({ msg:"Unauthorized"});
+        const product = await Product.create({ name, price, stock });
+        res.status(201).json({
+        msg: "Product created successfully",
+        success: true,
+        data: product,
+        });
+    } catch (err) {
+        console.log(err);
+
+    }
+    });
+
+//get all product
+app.get("/Products",async(req,res)=>{
+
+try{
+    const products=await Product.find();
+    res.status(200).json({
+        msg:"all product",
+        data:products
     })
+}  catch(err){
+        console.log(err);
+        
+    }
 
+})
+//one product
+app.get("/Products/search", async (req, res) => {
+  try {
+    const title = req.query.name;
+    const products = await Product.find({ name: { $regex: title, $options: "i" } });
 
-
-
-
+    res.status(200).json({
+      msg: "Products found",
+      data: products
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
 
 
 
