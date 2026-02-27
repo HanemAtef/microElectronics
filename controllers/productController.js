@@ -39,7 +39,9 @@ try{
 const search=async(req,res)=>{ 
 try {
     const title = req.query.name;
-    const products = await Product.find({ name: { $regex: title, $options: "i" } });
+    const products = await Product.find({ 
+        name: { $regex: title,
+        $options: "i" } });
 
     res.status(200).json({
       msg: "Products found",
